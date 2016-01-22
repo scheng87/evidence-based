@@ -5,6 +5,7 @@ library(tidyr)
 path <- "~/Documents/CI_Projects_LA/Knowledge_Base/"
 load("~/Documents/CI_Projects_LA/Knowledge_Base/evidence_based_11_2.RData")
 
+
 ##Create set variables for study design, these can be called later when interested in filtering datasets for quality of data
 BA_C_I <- filter(data.study, Comps == 1, Design.control == 1)
 BA_C_I <- filter(BA_C_I, Comps.time == "Punctuated" | Comps.time == "Yes, punctuated")
