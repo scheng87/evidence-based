@@ -191,7 +191,7 @@ std_mod <- anti_join(models,nov_mod,by="aid")
 std_mod <- distinct(std_mod)
 std_mod_aids <- distinct(as.data.frame(std_mod$aid))
 nov_mod_aids <- distinct(as.data.frame(nov_mod$aid))
-  
+
 library(gplots)
 library(RColorBrewer)
 #Create new dataframe with intervention and outcome data
