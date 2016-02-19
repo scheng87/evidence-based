@@ -1,9 +1,9 @@
 ##Phase II Analyses
 library(dplyr)
 library(tidyr)
+setwd("~/Documents/github/evidence-based/pathways/")
 
-load("~/Documents/CI_Projects_LA/Knowledge_Base/evidence_based_11_2.RData")
-setwd("~/Documents/CI_Projects_LA/Knowledge_Base/")
+load("evidence_based_2_11_16.RData")
 
 ##Conceptual models - exploring trends and informing pathways
 models <- filter(data.pathways,Concept_mod == 1)
@@ -191,14 +191,47 @@ std_mod <- anti_join(models,nov_mod,by="aid")
 std_mod <- distinct(std_mod)
 std_mod_aids <- distinct(as.data.frame(std_mod$aid))
 nov_mod_aids <- distinct(as.data.frame(nov_mod$aid))
+colnames(std_mod_aids) <- c("aid")
+colnames(nov_mod_aids) <- c("aid")
+std_mod_int_out <- left_join(std_mod_aids,data.interv,by="aid")
+std_mod_int_out <- left_join(std_mod_int_out,data.outcome,by="aid")
+nov_mod_int_out <- left_join(nov_mod_aids,data.interv,by="aid")
+nov_mod_int_out <- left_join(nov_mod_int_out,data.outcome,by="aid")
+std_mod_int_out <- std_mod_int_out %>% select(aid,Int_type,Outcome) %>% distinct()
+nov_mod_int_out <- nov_mod_int_out %>% select(aid,Int_type,Outcome) %>% distinct()
 
 library(gplots)
 library(RColorBrewer)
 #Create new dataframe with intervention and outcome data
-int_out <- left_join(data.interv, data.outcome, by = "aid")
-int_out <- select(int_out,aid,Int_type,Outcome)
-int_out <- distinct(int_out)
+int_out <- std_mod_int_out
 
+#Heatmap of linkages - UNCONDENSED
+int_type = c("area_protect", "area_mgmt", "res_mgmt", "sp_control", "restoration", "sp_mgmt", "sp_recov", "sp_reint", "ex_situ", "form_ed", "training", "aware_comm", "legis", "pol_reg", "priv_codes", "compl_enfor", "liv_alt", "sub", "market", "non_mon", "inst_civ_dev", "part_dev", "cons_fin", "sus_use", "other")
+out_type = c("env", "mat_liv_std", "eco_liv_std", "health", "education", "soc_rel", "sec_saf", "gov", "sub_well", "culture", "free_choice", "other")
+io_counts = matrix(nrow=12, ncol=25)
+rownames(io_counts) <- out_type
+colnames(io_counts) <- int_type
+#Calculate number of unique studies for each linkage cell between intervention and outcome
+#Calculate in for loop and write to blank matrix
+for (i in int_type){
+  for (j in out_type){
+    subset <- filter(int_out, Outcome == j, Int_type == i)
+    io_counts[j,i] <- n_distinct(subset$aid)
+  }
+}
+#Relabel rows and columns
+int_labels = c("Area protection", "Area management", "Resource management/protection", "Species control", "Restoration", "Species management", "Species recovery", "Species reintroduction", "Ex-situ conservation", "Formal education", "Training", "Awareness & Communications", "Legislation", "Policies & Regulations", "Private sector standards and codes", "Compliance & enforcement", "Enterprises & livelihood alternatives", "Substitution", "Market-based forces", "Non-monetary values", "Institutional & civil society development", "Alliance & partnership development", "Conservation finance", "Sustainable use", "Other")
+out_labels = c("Environmental", "Material living standards", "Economic living standards", "Health", "Education", "Social relations", "Security & safety", "Governance & empowerment", "Subjective well-being", "Culture & Spiritual", "Freedom of choice/action", "Other")
+rownames(io_counts) <- out_labels
+colnames(io_counts) <- int_labels
+
+#Define color palette for heatmap
+palette_final <- colorRampPalette(c("#e5f5f9", "#d9f0a3","#41ab5d", "#004529")) (n=50)
+                                    
+#Write heatmap and legend to PDF
+pdf(file="Interventions_Outcomes_Standard_models.pdf", width=11, height=8.5)
+heatmap.2(io_counts, Colv=NA, dendrogram="none", col=palette_final, cellnote=io_counts, notecol="black", notecex=1.0, trace="none", cexRow=1.5, cexCol=1.5, key=TRUE, Rowv=NA)
+dev.off()
 #Create new matrix for intervention groups
 rows <- c(1:nrow(int_out))
 int_groups <- matrix(nrow=nrow(int_out),ncol=1)
@@ -249,10 +282,7 @@ int_group_labels = c("Area protection", "Land/Water management", "Resource manag
 out_labels = c("Economic living standards", "Material living standards", "Health", "Education", "Social relations", "Security & safety", "Governance & empowerment", "Subjective well-being", "Culture & Spiritual", "Freedom of choice/action", "Other")
 rownames(ios_counts) <- out_labels
 colnames(ios_counts) <- int_group_labels
-#Define color palette for heatmap
-#Color1 - #d9f0a3 #41ab5d #004529
 
-palette_final <- colorRampPalette(c("#e5f5f9", #d9f0a3","#41ab5d", "#004529")) (n=50)
 #Write heatmap and legend to PDF
 pdf(file="Interventions_Outcomes_Condensed_Sys_Rev_Heatmap.pdf", width=11, height=8.5)
 heatmap.2(ios_counts, Colv=NA, dendrogram="none", col=palette_final, cellnote=ios_counts, notecol="black", notecex=1.0, trace="none", cexRow=1.5, cexCol=1.5, key=TRUE, Rowv=NA)
