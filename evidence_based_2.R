@@ -1,7 +1,7 @@
 ##Set up environment and constants
 library(dplyr)
 library(tidyr)
-path <- "~/Documents/CI_Projects_LA/Knowledge_Base/"
+path <- "~/Documents/github/McKinnon_et_al_2016/"
 lut.file <- "questions_LU_cat.csv"
 csv.file <- "Data_Final_06_23_2017_Eng_only_test.csv"
 csv <- paste(path, csv.file, sep="")
@@ -262,51 +262,6 @@ data.pathways <- move.column(data.pathways, "Pathway_notes")
 data.pathways$Factor_type[data.pathways$Factor_type ==""] <- NA
 #cleanup
 rm(list=ls(pattern="data.pathways."))
-
-##Summarise data
-##Bibliographic
-#Compute the the maximal number of values per multivalued field
-#summary.all <- summarizer.groupby(data.biblio, n_distinct, max)
-data.occurencel <- summarizer.list.all(data.biblio, c("Assessor","Assessor_2","Pub_type", "Affil_type"))
-##Intervention
-#Compute the the maximal number of values per multivalued field
-summary.all <- summarizer.groupby(data.interv, n_distinct, max)
-#list all the values accross the reviewd papers per multivalued field
-data.occurencel <- summarizer.list.all(data.interv, c("Int_area", "Int_geo", "Int_dur", "Int_type", "Impl_type"))
-##Study
-#Compute the the maximal number of values per multivalued field
-summary.all <- summarizer.groupby(data.study, n_distinct, max) %>% bind_rows(summary.all)
-#list all the values accross the reviewd papers per multivalued field
-data.occurencel <- summarizer.list.all(data.study, c("Data_source", "Eval_affil_type", "Marg_cat", "Comps")) %>%
-  bind_rows(data.occurencel)
-##Biome
-#Compute the the maximal number of values per multivalued field
-summary.all <- summarizer.groupby(data.biomes, n_distinct, max) %>% bind_rows(summary.all)
-#list all the values accross the reviewd papers per multivalued field
-data.occurencel <- summarizer.list.all(data.biomes, c("Biome.")) %>% bind_rows(data.occurencel)
-##Outcome
-#Compute the the maximal number of values per multivalued field
-summary.all <- summarizer.groupby(data.outcome, n_distinct, max) %>% bind_rows(summary.all)
-#list all the values accross the reviewd papers per multivalued field
-data.occurencel <- summarizer.list.all(data.outcome,"Outcome") %>%
-  bind_rows(data.occurencel)
-##Specific outcomes and impacts
-#Compute the the maximal number of values per multivalued field
-summary.all <- summarizer.groupby(data.outhwb, n_distinct, max) %>% bind_rows(summary.all)
-#list all the values accross the reviewd papers per multivalued field
-data.occurencel <- summarizer.list.all(data.outhwb,c("OutcomeHWB.gen_cat", "OutcomeHWB.spec_cat", "OutcomeHWB.groups", "OutcomeHWB.Data_type", "OutcomeHWB.Percept", "OutcomeHWB.Equity", "OutcomeHWB", "OutcomeHWB.impact")) %>% bind_rows(data.occurencel)
-##Pathways
-#Compute the the maximal number of values per multivalued field
-summary.all <- summarizer.groupby(data.pathways, n_distinct, max) %>% bind_rows(summary.all)
-#list all the values accross the reviewd papers per multivalued field
-data.occurencel <- summarizer.list.all(data.pathways, c("Concept_mod_name", "Factors","Factor_type", "ES_mechanism","ES_type","ES_subtype", "Disservices")) %>%
-  bind_rows(data.occurencel)
-##Clean up summaries
-#Remove aid duplicates
-summary.all <- distinct(summary.all)
-#join the max and values list
-summary.all <- left_join(summary.all,data.occurencel,by="field")
-##Rename summary fields by journal articles
 
 ##Write final R data and package
 save(data.biblio,data.interv,data.study,data.biomes,data.outcome,data.outhwb,data.pathways, file = paste(path, "evidence_based_06_23_17.RData", sep=""))
